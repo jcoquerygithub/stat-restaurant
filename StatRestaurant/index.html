@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistiques Restaurant MAIF</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript">
+        var monthNames = [
+            "Janvier", "Février", "Mars",
+            "Avril", "Mai", "Juin", "Juillet",
+            "Août", "Septembre", "Octobre",
+            "Novembre", "Décembre"
+        ];
+
+        var dayNames = [
+            "Dimanche", "Lundi", "Mardi",
+            "Mercredi", "Jeudi", "Vendredi",
+            "Samedi"
+        ];
+
+        function pad(n) {
+            return n < 10 ? '0' + n : n;
+        }
+
+        function getDateString(dt) {
+            return [dt.getFullYear(), pad(dt.getMonth() + 1), pad(dt.getDate())].join('-');
+        }
+        function getDateStringHuman(dt) {
+            return [pad(dt.getDate()), monthNames[dt.getMonth()]].join(' ');
+        }
+
+        var date = new Date();
+        var next_date = new Date();
+        var prec_date = new Date();
+        date.setHours(0, 0, 0, 0);
+        next_date.setHours(0, 0, 0, 0);
+        prec_date.setHours(0, 0, 0, 0);
+
+        google.charts.load('current', {'packages': ['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var jsonData = $.ajax({
+                url: "/data",
+                data: {date: getDateString(date)},
+                dataType: "json",
+                async: false
+            }).responseText;
+
+            // Create our data table out of JSON data loaded from server.
+            var data = new google.visualization.DataTable(jsonData);
+
+            var datemin = new Date(date);
+            datemin.setHours(11, 45, 0, 0);
+
+            var datemax = new Date(date);
+            datemax.setHours(14, 15, 0, 0);
+
+            var options = {
+                title: 'Occupation du ' + dayNames[date.getDay()] +
+                " " + getDateStringHuman(date),
+                legend: {position: 'bottom'},
+                hAxis: {format: 'HH:mm:ss', minValue: datemin, maxValue: datemax},
+                vAxis: {minValue: '0', maxValue: '100'},
+                series : {0: { color: '3366cc' },1: { color: '#ff9900', lineDashStyle: [8, 4]},}
+            };
+
+
+            // Instantiate and draw our chart, passing in some options.
+            var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+
+        previousDate = function () {
+            if (date.getDay() == 1) {
+                date.setDate(date.getDate() - 3);
+            } else if (date.getDay() == 0) {
+                date.setDate(date.getDate() - 2);
+            } else {
+                date.setDate(date.getDate() - 1);
+            }
+            date.setHours(0, 0, 0, 0);
+            drawChart();
+            drawButtons();
+        };
+
+        nextDate = function () {
+            var curr_date = new Date();
+            curr_date.setHours(0, 0, 0, 0);
+            if (date.getTime() != curr_date.getTime()) {
+                if (date.getDay() == 5) {
+                    date.setDate(date.getDate() + 3);
+                } else if (date.getDay() == 6) {
+                    date.setDate(date.getDate() + 2);
+                } else {
+                    date.setDate(date.getDate() + 1);
+                }
+                date.setHours(0, 0, 0, 0);
+
+                drawChart();
+                drawButtons();
+            }
+        };
+
+        function drawButtons() {
+            var precDate = new Date(date);
+            var nextDate = new Date(date);
+
+            if (nextDate.getDay() == 5) {
+                nextDate.setDate(nextDate.getDate() + 3);
+            } else if (nextDate.getDay() == 6) {
+                nextDate.setDate(nextDate.getDate() + 2);
+            } else {
+                nextDate.setDate(nextDate.getDate() + 1);
+            }
+            if (precDate.getDay() == 1) {
+                precDate.setDate(precDate.getDate() - 3);
+            } else if (precDate.getDay() == 0) {
+                precDate.setDate(precDate.getDate() - 2);
+            } else {
+                precDate.setDate(precDate.getDate() - 1);
+            }
+
+            document.getElementById('prec_button').innerHTML = "Jour Précédent<br/>" + getDateStringHuman(precDate);
+            document.getElementById('next_button').innerHTML = "Jour Suivant<br/>" + getDateStringHuman(nextDate);
+            if (nextDate.getTime() > new Date().getTime()) {
+                document.getElementById('next_button').style.visibility = 'hidden';
+            }
+            else {
+                document.getElementById('next_button').style.visibility = 'visible';
+            }
+        }
+
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Set interval to call the drawChart again
+            setInterval(drawChart, 60000);
+            drawButtons();
+        });
+    </script>
+    <style>
+        .button {
+            background: #3498db;
+            background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+            background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+            background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+            background-image: -o-linear-gradient(top, #3498db, #2980b9);
+            background-image: linear-gradient(to bottom, #3498db, #2980b9);
+            border-radius: 28px;
+            font-family: Arial, cursive;
+            color: #ffffff;
+            font-size: 20px;
+            padding: 10px 20px 10px 20px;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            background: #3cb0fd;
+            background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+            background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+            background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+            background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+            background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+            text-decoration: none;
+        }
+
+        .button:focus {
+            outline: 0;
+        }
+    </style>
+</head>
+<div>
+    <button id="prec_button" class="button" onclick="previousDate();"></button>
+    <button id="next_button" class="button" onclick="nextDate();"></button>
+</div>
+<body>
+<div id="chart_div" style="height: 800px"></div>
+</body>
+</html>
