@@ -13,6 +13,6 @@ ADD StatRestaurant /StatRestaurant
 
 WORKDIR /StatRestaurant
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["/usr/bin/env", "python", "/StatRestaurant/webserver.py"]

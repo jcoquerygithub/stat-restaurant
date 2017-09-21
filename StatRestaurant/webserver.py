@@ -7,6 +7,7 @@ from threading import Event, Thread
 from clientapi import restaurant
 from storeapi.psql import Store
 from dateutil import tz
+from os import environ
 import BaseHTTPServer
 import signal
 import sys
@@ -175,7 +176,7 @@ if __name__ == '__main__':
     sys.stdout = Unbuffered(sys.stdout)
     signal.signal(signal.SIGTERM, signal_term_handler)
     log('Starting Server')
-    server = BaseHTTPServer.HTTPServer(('0.0.0.0', 8000), RequestHandler)
+    server = BaseHTTPServer.HTTPServer(('0.0.0.0', environ.get('PORT')), RequestHandler)
     stopFlag = Event()
     thread = Data(stopFlag)
     thread.start()
