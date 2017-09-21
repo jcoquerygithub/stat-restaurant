@@ -16,7 +16,7 @@ class Store:
                              host=environ.get('POSTGRESQL_ADDON_HOST'),
                              port=int(environ.get('POSTGRESQL_ADDON_PORT')),
                              user=environ.get('POSTGRESQL_ADDON_USER'),
-                             passwd=environ.get('POSTGRESQL_ADDON_PASSWORD '))
+                             passwd=environ.get('POSTGRESQL_ADDON_PASSWORD'))
         try:
             self.connection.query("SELECT * FROM stats")
         except ProgrammingError:
