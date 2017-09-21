@@ -14,7 +14,7 @@ class Store:
     def __init__(self):
         self.connection = DB(dbname=environ.get('POSTGRESQL_ADDON_DB'),
                              host=environ.get('POSTGRESQL_ADDON_HOST'),
-                             port=environ.get('POSTGRESQL_ADDON_PORT'),
+                             port=int(environ.get('POSTGRESQL_ADDON_PORT')),
                              user=environ.get('POSTGRESQL_ADDON_USER'),
                              passwd=environ.get('POSTGRESQL_ADDON_PASSWORD '))
         try:
